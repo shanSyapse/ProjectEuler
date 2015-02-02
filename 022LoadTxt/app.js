@@ -63,24 +63,49 @@ Tree.prototype.addChildren = function(val) {
     for (var i = 0; i < val.length; i ++) {
         idx = maps[val[i]] - 1;
         if (!headNode.children[idx]) {
-
             headNode.children[idx] = new Node();
         }
         headNode = headNode.children[idx];
     }
     headNode.word = val;
 };
-Tree.prototype.traverseDepth = function() {
+var getValue = function (str) {
+    var val = 0;
+    for (var i = 0; i < str.length; i++) {
+        val += maps[str[i]];
+    }
+    return val;
+}
+Tree.prototype.countScore = function(headNode, rank, total) {
+    headNode = this.head;
+    rank = 0;
+    total = 0;
+    
+    var traversTree = function(node) {
+        var children = node.children;
+
+        for (var i = 0; i < children.length; i ++) {
+            var child = children[i];
+            if (!child) continue;
+            if (child.word) {
+                rank = rank + 1;
+                total += getValue(child.word) * rank;
+            }
+            if (child.children.length) {
+                traversTree(child);
+            }
+        }
+    }
+    traversTree(headNode);
+    return total;
 };
 fs.readFile(args, function (err, data) {
     if (err) throw err;
     var dicts = data.toString().split(',');
     var trie = new Tree();
-    for (var i = 0; i < 1; i ++ ) {
+    for (var i = 0; i < dicts.length; i ++ ) {
         var word = dicts[i].slice(1, -1);
         trie.addChildren(word);
     }
-    console.log(JSON.stringify(trie));
-
-    // console.log(data.toString(), 'test');
+    console.log(trie.countScore());
 })
